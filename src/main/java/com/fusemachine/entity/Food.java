@@ -1,10 +1,15 @@
 package com.fusemachine.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
+//@JsonIgnoreProperties("orders")
 public class Food {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,10 +20,18 @@ public class Food {
     private double price;
 
     @ManyToMany
+    @JsonBackReference
     @JoinTable(name = "menu_item",
-                joinColumns = @JoinColumn(name = "menu_id"),
-                inverseJoinColumns = @JoinColumn(name = "food_id"))
-    private List<Menu> menus;
+                joinColumns = @JoinColumn(name = "food_id"),
+                inverseJoinColumns = @JoinColumn(name = "menu_id"))
+    private Set<Menu> menus;
+
+//    @ManyToMany
+////    @JsonBackReference
+//    @JoinTable(name = "order_item",
+//            joinColumns = @JoinColumn(name = "food_id"),
+//            inverseJoinColumns = @JoinColumn(name = "order_id"))
+//    private Set<Order> orders;
 
     public Food(){}
 
@@ -51,13 +64,21 @@ public class Food {
         this.price = price;
     }
 
-    public List<Menu> getMenus() {
+    public Set<Menu> getMenus() {
         return menus;
     }
 
-    public void setMenus(List<Menu> menus) {
+    public void setMenus(Set<Menu> menus) {
         this.menus = menus;
     }
+
+//    public Set<Order> getOrders() {
+//        return orders;
+//    }
+//
+//    public void setOrders(Set<Order> orders) {
+//        this.orders = orders;
+//    }
 
     @Override
     public boolean equals(Object o) {

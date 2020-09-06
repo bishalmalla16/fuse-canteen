@@ -1,9 +1,9 @@
 package com.fusemachine.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Entity
 public class Menu {
@@ -19,13 +19,14 @@ public class Menu {
 
     public Menu(Date date) {
         this.date = date;
-        this.foods = new ArrayList<>();
+        this.foods = new HashSet<>();
     }
 
     @ManyToMany
+    @JsonManagedReference
     @JoinTable(name = "menu_item", joinColumns = @JoinColumn(name = "menu_id"),
                                     inverseJoinColumns = @JoinColumn(name = "food_id"))
-    private List<Food> foods;
+    private Set<Food> foods;
 
     public int getId() {
         return id;
@@ -43,17 +44,17 @@ public class Menu {
         this.date = date;
     }
 
-    public List<Food> getFoods() {
+    public Set<Food> getFoods() {
         return foods;
     }
 
-    public void setFoods(List<Food> foods) {
+    public void setFoods(Set<Food> foods) {
         this.foods = foods;
     }
 
     public boolean addItem(Food food){
         if(this.foods == null){
-            this.foods = new ArrayList<>();
+            this.foods = new HashSet<>();
         }
         if(!this.foods.contains(food)) {
             this.foods.add(food);

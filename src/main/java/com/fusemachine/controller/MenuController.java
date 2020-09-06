@@ -17,7 +17,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api")
@@ -65,7 +65,7 @@ public class MenuController {
     }
 
     @GetMapping("/menus/{id}/foods")
-    public List<Food> findAllItemsById(@PathVariable int id){
+    public Set<Food> findAllItemsById(@PathVariable int id){
         Menu menu = menuService.findById(id);
         if(menu == null){
             throw new MenuNotFoundException("Menu with id = " + id + " not found.");

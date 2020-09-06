@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 @Service
 public class MenuService {
@@ -15,7 +15,7 @@ public class MenuService {
     @Autowired
     private MenuRepository menuRepo;
 
-    public List<Food> findFoodsById(int id){
+    public Set<Food> findFoodsById(int id){
         Menu menu = findById(id);
         return menu.getFoods();
     }
