@@ -15,7 +15,7 @@ public class Food {
     private double price;
 
     @ManyToMany
-    @JoinTable(name = "menu_list",
+    @JoinTable(name = "menu_item",
                 joinColumns = @JoinColumn(name = "menu_id"),
                 inverseJoinColumns = @JoinColumn(name = "food_id"))
     private List<Menu> menus;

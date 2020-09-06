@@ -6,6 +6,7 @@ import com.fusemachine.repo.MenuRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -23,19 +24,29 @@ public class MenuService {
         return menuRepo.findById(id).orElse(null);
     }
 
+    public Menu findByDate(Date date){
+        return menuRepo.findByDateEquals(date).orElse(null);
+    }
+
     public void save(Menu menu){
         menuRepo.save(menu);
     }
 
-    public void addItem(int menuId, Food food){
+    public boolean addItem(int menuId, Food food){
         Menu menu = findById(menuId);
-        menu.addItem(food);
+        if(!menu.addItem(food)){
+            return false;
+        }
         menuRepo.save(menu);
+        return true;
     }
 
-    public void removeItem(int menuId, Food food){
+    public boolean removeItem(int menuId, Food food){
         Menu menu = findById(menuId);
-        menu.removeItem(food);
+        if(!menu.removeItem(food)){
+            return false;
+        }
         menuRepo.save(menu);
+        return true;
     }
 }

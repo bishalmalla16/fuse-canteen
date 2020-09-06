@@ -11,10 +11,19 @@ public class Menu {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Temporal(TemporalType.DATE)
     private Date date;
 
+    public Menu() {
+    }
+
+    public Menu(Date date) {
+        this.date = date;
+        this.foods = new ArrayList<>();
+    }
+
     @ManyToMany
-    @JoinTable(name = "menu_items", joinColumns = @JoinColumn(name = "menu_id"),
+    @JoinTable(name = "menu_item", joinColumns = @JoinColumn(name = "menu_id"),
                                     inverseJoinColumns = @JoinColumn(name = "food_id"))
     private List<Food> foods;
 
@@ -42,13 +51,15 @@ public class Menu {
         this.foods = foods;
     }
 
-    public void addItem(Food food){
+    public boolean addItem(Food food){
         if(this.foods == null){
             this.foods = new ArrayList<>();
         }
         if(!this.foods.contains(food)) {
             this.foods.add(food);
+            return true;
         }
+        return false;
     }
 
     public boolean removeItem(Food food){
