@@ -1,9 +1,8 @@
 package com.fusemachine.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.List;
+import java.util.Objects;
 
 @Entity
 public class Food {
@@ -14,6 +13,12 @@ public class Food {
     private String name;
 
     private double price;
+
+    @ManyToMany
+    @JoinTable(name = "menu_list",
+                joinColumns = @JoinColumn(name = "menu_id"),
+                inverseJoinColumns = @JoinColumn(name = "food_id"))
+    private List<Menu> menus;
 
     public Food(){}
 
@@ -44,5 +49,27 @@ public class Food {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public List<Menu> getMenus() {
+        return menus;
+    }
+
+    public void setMenus(List<Menu> menus) {
+        this.menus = menus;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Food food = (Food) o;
+        return id == food.id &&
+                Objects.equals(name, food.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name);
     }
 }
