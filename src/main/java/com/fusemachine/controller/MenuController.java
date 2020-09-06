@@ -66,6 +66,10 @@ public class MenuController {
 
     @GetMapping("/menus/{id}/foods")
     public List<Food> findAllItemsById(@PathVariable int id){
+        Menu menu = menuService.findById(id);
+        if(menu == null){
+            throw new MenuNotFoundException("Menu with id = " + id + " not found.");
+        }
         return menuService.findFoodsById(id);
     }
 
