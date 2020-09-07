@@ -33,4 +33,15 @@ public class CanteenExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(value = NotFoundException.class)
+    public ResponseEntity<ApiError> handleException(NotFoundException ex){
+        ApiError error = new ApiError();
+
+        error.setStatus(HttpStatus.NOT_FOUND);
+        error.setMessage(ex.getMessage());
+        error.setTimeStamp(LocalDateTime.now());
+
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
 }

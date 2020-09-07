@@ -5,12 +5,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
-//@JsonIgnoreProperties("orders")
+@JsonIgnoreProperties("orders")
 public class Food {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,12 +26,12 @@ public class Food {
                 inverseJoinColumns = @JoinColumn(name = "menu_id"))
     private Set<Menu> menus;
 
-//    @ManyToMany
-////    @JsonBackReference
-//    @JoinTable(name = "order_item",
-//            joinColumns = @JoinColumn(name = "food_id"),
-//            inverseJoinColumns = @JoinColumn(name = "order_id"))
-//    private Set<Order> orders;
+    @ManyToMany
+    @JsonBackReference
+    @JoinTable(name = "order_item",
+            joinColumns = @JoinColumn(name = "food_id"),
+            inverseJoinColumns = @JoinColumn(name = "order_id"))
+    private Set<UserOrder> orders;
 
     public Food(){}
 
@@ -73,13 +72,13 @@ public class Food {
         this.menus = menus;
     }
 
-//    public Set<Order> getOrders() {
-//        return orders;
-//    }
-//
-//    public void setOrders(Set<Order> orders) {
-//        this.orders = orders;
-//    }
+    public Set<UserOrder> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(Set<UserOrder> orders) {
+        this.orders = orders;
+    }
 
     @Override
     public boolean equals(Object o) {

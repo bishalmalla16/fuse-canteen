@@ -1,19 +1,24 @@
 package com.fusemachine.controller;
 
-import com.fusemachine.entity.Food;
-import com.fusemachine.entity.Order;
+import com.fusemachine.entity.UserOrder;
 import com.fusemachine.entity.User;
+import com.fusemachine.exceptions.NotFoundException;
+import com.fusemachine.service.FoodService;
 import com.fusemachine.service.OrderService;
 import com.fusemachine.service.UserService;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.OrderColumn;
-import java.util.Calendar;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api")
@@ -26,32 +31,146 @@ public class OrderController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/users/{userId}/orders")
-    public void save(@RequestBody Order order, @PathVariable int userId){
-        User user = userService.findById(userId);
-        order.setUser(user);
-        order.setDate(Calendar.getInstance().getTime());
-        order.setStatus(Order.OrderStatus.PENDING.name());
+    @Autowired
+    private FoodService foodService;
 
-//        Set<Food> foods = order.getFoods();
-        double totalPrice = 0;
-//        for (Food food : foods) {
-//            totalPrice += food.getPrice();
-//        }
-        order.setTotalPrice(totalPrice);
-        orderService.save(order);
-    }
+    private static final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
-    @GetMapping("/users/{id}/orders")
-    public List<Order> findAll(@PathVariable int id){
-        return orderService.findAllByUserId(id);
+    @InitBinder
+    public void initBinder(WebDataBinder dataBinder) throws Exception {
+        CustomDateEditor dateEditor = new CustomDateEditor(dateFormatter, true){
+            @Override
+            public void setAsText(String text) throws IllegalArgumentException {
+                if(text.equals("today"))
+                    setValue(new Date());
+                else {
+                    try {
+                        super.setAsText(text);
+                    }catch (IllegalArgumentException ex){
+                        logger.error("Illegal Exception: " + ex.getMessage());
+                    }
+                }
+            }
+        };
+        dataBinder.registerCustomEditor(Date.class, dateEditor);
     }
 
     @GetMapping("/orders")
-    public List<Order> findAll(){
-        return orderService.findAll();
+    public List<UserOrder> findAll(@RequestParam(required = false, defaultValue = "today") Date date){
+        Date startTime;
+        Date endTime;
+        try {
+            startTime = dateTimeFormatter.parse(dateFormatter.format(date) + " 00:00:00");
+            endTime = dateTimeFormatter.parse(dateFormatter.format(date) + " 23:59:59");
+            return orderService.findAllByDateBetween(startTime, endTime);
+        }catch (ParseException ex){
+            logger.error(ex.getMessage());
+            return null;
+        }
     }
 
+    @GetMapping("/orders/{id}")
+    public UserOrder findById(@PathVariable int id){
+        UserOrder order = orderService.findById(id);
+        if(order == null){
+            throw new NotFoundException("Order with id = " + id + " not found.");
+        }
+        return order;
+    }
 
+    @PutMapping("/orders/{id}")
+    public void updateOrderStatus(@PathVariable int id, @RequestBody JSONObject object){
+        UserOrder order = orderService.findById(id);
+        if(order == null){
+            throw new NotFoundException("Order with id = " + id + " not found.");
+        }
+        String statusName = object.get("status").toString();
+        UserOrder.OrderStatus status;
+        if(statusName.equalsIgnoreCase("PENDING"))
+            status = UserOrder.OrderStatus.PENDING;
+        else if(statusName.equalsIgnoreCase("IN_PROCESS"))
+            status = UserOrder.OrderStatus.IN_PROCESS;
+        else if(statusName.equalsIgnoreCase("READY"))
+            status = UserOrder.OrderStatus.READY;
+        else
+            throw new IllegalArgumentException("Invalid status");
+
+        order.setStatus(status.name());
+        orderService.save(order);
+    }
+
+    @DeleteMapping("/orders/{id}")
+    public void deleteById(@PathVariable int id){
+        UserOrder order = orderService.findById(id);
+        if(order == null){
+            throw new NotFoundException("Order with id = " + id + " not found.");
+        }
+        orderService.deleteById(id);
+    }
+
+    @GetMapping("/users/{id}/orders")
+    public List<UserOrder> findAll(@PathVariable int id, @RequestParam(required = false, defaultValue = "today") Date date){
+        Date startTime;
+        Date endTime;
+        try {
+            startTime = dateTimeFormatter.parse(dateFormatter.format(date) + " 00:00:00");
+            endTime = dateTimeFormatter.parse(dateFormatter.format(date) + " 23:59:59");
+            return orderService.findAllByUserIdAndDateBetween(id, startTime, endTime);
+        }catch (ParseException ex){
+            logger.error(ex.getMessage());
+            return null;
+        }
+    }
+
+    @GetMapping("/users/{userId}/orders/{id}")
+    public UserOrder findByOrderId(@PathVariable int userId, @PathVariable int id){
+        User user = userService.findById(userId);
+        if(user == null){
+            throw new NotFoundException("User with id = " + userId + " not found.");
+        }
+        if(!orderService.findAllByUserId(userId).contains(orderService.findById(id))){
+            throw new NotFoundException("This User doesn't have order with id = " + id);
+        }
+        return orderService.findById(id);
+    }
+
+    @PostMapping("/users/{userId}/orders")
+    public void save(@RequestBody UserOrder order, @PathVariable int userId){
+        User user = userService.findById(userId);
+        if(user == null){
+            throw new NotFoundException("User with id = " + userId + " not found.");
+        }
+        if(order.getFoods().isEmpty())
+            throw new NotFoundException("Can't place an empty order.");
+        orderService.save(user, order);
+    }
+
+    @PutMapping("/users/{userId}/orders/{id}")
+    public void updateOrder(@PathVariable int userId, @PathVariable int id, @RequestBody UserOrder order){
+        User user = userService.findById(userId);
+        if(user == null){
+            throw new NotFoundException("User with id = " + userId + " not found.");
+        }
+        if(!orderService.findAllByUserId(userId).contains(orderService.findById(id))){
+            throw new NotFoundException("This User doesn't have order with id = " + id);
+        }
+        if(order.getFoods().isEmpty())
+            throw new NotFoundException("Can't place an empty order.");
+        order.setId(id);
+        orderService.save(user, order);
+    }
+
+    @DeleteMapping("/users/{userId}/orders/{id}")
+    public void deleteOrder(@PathVariable int userId, @PathVariable int id){
+        User user = userService.findById(userId);
+        if(user == null){
+            throw new NotFoundException("User with id = " + userId + " not found.");
+        }
+        if(!orderService.findAllByUserId(userId).contains(orderService.findById(id))){
+            throw new NotFoundException("This User doesn't have order with id = " + id);
+        }
+        orderService.deleteById(id);
+    }
 
 }

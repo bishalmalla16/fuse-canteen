@@ -1,19 +1,22 @@
 package com.fusemachine.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
-public class Order {
+@Table(name = "user_order")
+public class UserOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date date;
 
     public enum OrderStatus {
@@ -29,17 +32,19 @@ public class Order {
     @JoinColumn(name = "user_id")
     private User user;
 
-//    @ManyToMany
-//    @JsonManagedReference
-//    @JoinTable(name = "order_item",
-//                joinColumns = @JoinColumn(name = "order_id"),
-//                inverseJoinColumns = @JoinColumn(name = "food_id"))
-//    private Set<Food> foods;
+    @ManyToMany
+    @JsonManagedReference
+    @NotNull
+    @JsonIgnore
+    @JoinTable(name = "order_item",
+                joinColumns = @JoinColumn(name = "order_id"),
+                inverseJoinColumns = @JoinColumn(name = "food_id"))
+    private Set<Food> foods;
 
     @Column(name = "total_price")
     private double totalPrice;
 
-    public Order() {
+    public UserOrder() {
     }
 
     public int getId() {
@@ -74,13 +79,13 @@ public class Order {
         this.user = user;
     }
 
-//    public Set<Food> getFoods() {
-//        return foods;
-//    }
-//
-//    public void setFoods(Set<Food> foods) {
-//        this.foods = foods;
-//    }
+    public Set<Food> getFoods() {
+        return foods;
+    }
+
+    public void setFoods(Set<Food> foods) {
+        this.foods = foods;
+    }
 
     public double getTotalPrice() {
         return totalPrice;
@@ -88,5 +93,18 @@ public class Order {
 
     public void setTotalPrice(double totalPrice) {
         this.totalPrice = totalPrice;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserOrder userOrder = (UserOrder) o;
+        return id == userOrder.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

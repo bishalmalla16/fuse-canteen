@@ -1,6 +1,8 @@
 package com.fusemachine.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -29,9 +31,9 @@ public class User {
     @JoinColumn(name = "role_id")
     private Role role;
 
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-//    @JsonBackReference
-//    private List<Order> orders;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<UserOrder> orders;
 
     public User() {
     }
@@ -76,11 +78,11 @@ public class User {
         this.role = role;
     }
 
-//    public List<Order> getOrders() {
-//        return orders;
-//    }
-//
-//    public void setOrders(List<Order> orders) {
-//        this.orders = orders;
-//    }
+    public List<UserOrder> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(List<UserOrder> orders) {
+        this.orders = orders;
+    }
 }
