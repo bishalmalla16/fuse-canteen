@@ -13,14 +13,13 @@ import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/menus")
 public class MenuController {
 
     private static final Logger logger = LoggerFactory.getLogger(MenuController.class);
@@ -31,31 +30,38 @@ public class MenuController {
     @Autowired
     private FoodService foodService;
 
+    private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+
+
     @InitBinder
     public void initBinder(WebDataBinder dataBinder) throws Exception {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
-        CustomDateEditor dateEditor = new CustomDateEditor(dateFormat, true){
+        CustomDateEditor dateEditor = new CustomDateEditor(formatter, true){
             @Override
             public void setAsText(String text) throws IllegalArgumentException {
                 if(text.equals("today"))
                     setValue(new Date());
-                else
-                    super.setAsText(text);
+                else {
+                    try {
+                        super.setAsText(text);
+                    }catch (IllegalArgumentException ex){
+                        logger.error("Illegal Exception: " + ex.getMessage());
+                    }
+                }
             }
         };
         dataBinder.registerCustomEditor(Date.class, dateEditor);
     }
 
-    @GetMapping("/menus")
-    private Menu findByDate(@RequestParam(required = false, defaultValue = "today") Date date){
+    @GetMapping
+    public Menu findByDate(@RequestParam(required = false, defaultValue = "today") Date date){
         Menu menu = menuService.findByDate(date);
         if(menu == null){
-            throw new MenuNotFoundException("Menu not found for today.");
+            throw new MenuNotFoundException("Menu not found for date : " + formatter.format(date));
         }
         return menu;
     }
 
-    @GetMapping("/menus/{id}")
+    @GetMapping("/{id}")
     public Menu findById(@PathVariable int id){
         Menu menu = menuService.findById(id);
         if(menu == null){
@@ -64,52 +70,62 @@ public class MenuController {
         return menu;
     }
 
-    @GetMapping("/menus/{id}/foods")
-    public Set<Food> findAllItemsById(@PathVariable int id){
-        Menu menu = menuService.findById(id);
-        if(menu == null){
-            throw new MenuNotFoundException("Menu with id = " + id + " not found.");
-        }
-        return menuService.findFoodsById(id);
-    }
-
-    @PostMapping("/menus")
-    public void save(){
-        Menu menu = menuService.findByDate(Calendar.getInstance().getTime());
-        if(menu != null) {
-
+    @PostMapping
+    public void save(@RequestBody Menu menu){
+        Menu todayMenu = menuService.findByDate(Calendar.getInstance().getTime());
+        if(todayMenu != null) {
             //To be changed to MenuAlreadyExistException
             throw new MenuNotFoundException("Menu Already Exist for today.");
-        }else{
-            menu = new Menu(Calendar.getInstance().getTime());
-            menuService.save(menu);
         }
+        menu.setDate(Calendar.getInstance().getTime());
+        menuService.save(menu);
     }
 
-    @PostMapping("/menus/{id}/foods")
-    public void addItem(@PathVariable int id, @RequestParam(defaultValue = "") String item){
-        Menu menu = menuService.findById(id);
+    @PutMapping
+    public void updateMenu(@RequestBody Menu menu){
+        Menu todayMenu = menuService.findByDate(Calendar.getInstance().getTime());
+        if(todayMenu == null) {
+            throw new MenuNotFoundException("Menu not found for today.");
+        }
+        menu.setId(todayMenu.getId());
+        menu.setDate(todayMenu.getDate());
+        menuService.save(menu);
+    }
+
+
+    @GetMapping("/foods")
+    public Set<Food> findAllItemsById(){
+        Menu menu = menuService.findByDate(Calendar.getInstance().getTime());
         if(menu == null){
-            throw new MenuNotFoundException("Menu with id = " + id + " not found.");
+            throw new MenuNotFoundException("Today's Menu not found.");
+        }
+        return menuService.findFoodsById(menu.getId());
+    }
+
+    @PostMapping("/foods")
+    public void addItem(@RequestParam(defaultValue = "") String item){
+        Menu menu = menuService.findByDate(Calendar.getInstance().getTime());
+        if(menu == null){
+            throw new MenuNotFoundException("Today's menu not found.");
         }
         Food food = foodService.findByName(item);
         if(food == null){
             throw new ItemNotFoundException("Item with name = " + item + " not found.");
         }
-        if(!menuService.addItem(id, food)){
+        if(!menuService.addItem(menu, food)){
             //To be changed
             throw new ItemNotFoundException("Item with name = " + item + " already in menu.");
         }
     }
 
-    @DeleteMapping("/menus/{id}/foods")
-    public void removeItem(@PathVariable int id, @RequestParam(defaultValue = "") String item){
-        Menu menu = menuService.findById(id);
+    @DeleteMapping("/foods")
+    public void removeItem(@RequestParam(defaultValue = "") String item){
+        Menu menu = menuService.findByDate(Calendar.getInstance().getTime());
         if(menu == null){
-            throw new MenuNotFoundException("Menu with id = " + id + " not found.");
+            throw new MenuNotFoundException("Today's menu not found.");
         }
         Food food = foodService.findByName(item);
-        if(food == null || !menuService.removeItem(id, food)){
+        if(food == null || !menuService.removeItem(menu, food)){
             throw new ItemNotFoundException("Item with name = " + item + " not available in menu.");
         }
     }

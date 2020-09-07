@@ -1,5 +1,6 @@
 package com.fusemachine.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
@@ -14,6 +15,13 @@ public class Menu {
     @Temporal(TemporalType.DATE)
     private Date date;
 
+    @ManyToMany
+    @JsonManagedReference
+    @JsonIgnore
+    @JoinTable(name = "menu_item", joinColumns = @JoinColumn(name = "menu_id"),
+                                    inverseJoinColumns = @JoinColumn(name = "food_id"))
+    private Set<Food> foods;
+
     public Menu() {
     }
 
@@ -21,12 +29,6 @@ public class Menu {
         this.date = date;
         this.foods = new HashSet<>();
     }
-
-    @ManyToMany
-    @JsonManagedReference
-    @JoinTable(name = "menu_item", joinColumns = @JoinColumn(name = "menu_id"),
-                                    inverseJoinColumns = @JoinColumn(name = "food_id"))
-    private Set<Food> foods;
 
     public int getId() {
         return id;

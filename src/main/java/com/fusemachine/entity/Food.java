@@ -1,6 +1,7 @@
 package com.fusemachine.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
@@ -20,7 +21,7 @@ public class Food {
     private double price;
 
     @ManyToMany
-    @JsonBackReference
+    @JsonIgnore
     @JoinTable(name = "menu_item",
                 joinColumns = @JoinColumn(name = "food_id"),
                 inverseJoinColumns = @JoinColumn(name = "menu_id"))

@@ -32,8 +32,7 @@ public class MenuService {
         menuRepo.save(menu);
     }
 
-    public boolean addItem(int menuId, Food food){
-        Menu menu = findById(menuId);
+    public boolean addItem(Menu menu, Food food){
         if(!menu.addItem(food)){
             return false;
         }
@@ -41,8 +40,7 @@ public class MenuService {
         return true;
     }
 
-    public boolean removeItem(int menuId, Food food){
-        Menu menu = findById(menuId);
+    public boolean removeItem(Menu menu, Food food){
         if(!menu.removeItem(food)){
             return false;
         }
