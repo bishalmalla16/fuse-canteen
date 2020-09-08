@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@JsonIgnoreProperties("orders")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Food {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,6 +32,13 @@ public class Food {
             joinColumns = @JoinColumn(name = "food_id"),
             inverseJoinColumns = @JoinColumn(name = "order_id"))
     private Set<UserOrder> orders;
+
+    @ManyToMany
+    @JsonIgnore
+    @JoinTable(name = "request_item",
+            joinColumns = @JoinColumn(name = "food_id"),
+            inverseJoinColumns = @JoinColumn(name = "request_id"))
+    private Set<UserRequest> requests;
 
     public Food(){}
 
@@ -78,6 +85,14 @@ public class Food {
 
     public void setOrders(Set<UserOrder> orders) {
         this.orders = orders;
+    }
+
+    public Set<UserRequest> getRequests() {
+        return requests;
+    }
+
+    public void setRequests(Set<UserRequest> requests) {
+        this.requests = requests;
     }
 
     @Override

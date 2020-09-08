@@ -1,0 +1,57 @@
+package com.fusemachine.service;
+
+import com.fusemachine.entity.Food;
+import com.fusemachine.entity.User;
+import com.fusemachine.entity.UserRequest;
+import com.fusemachine.exceptions.NotFoundException;
+import com.fusemachine.repo.FoodRepository;
+import com.fusemachine.repo.RequestItemRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
+
+@Service
+public class RequestItemService {
+
+    private static final Logger logger = LoggerFactory.getLogger(RequestItemService.class);
+
+    @Autowired
+    private RequestItemRepository requestRepo;
+
+    @Autowired
+    private FoodRepository foodRepo;
+
+    public UserRequest findByUserIdAndDate(int id, Date date) {
+        return requestRepo.findByUserIdAndDateEquals(id, date);
+    }
+
+    public UserRequest findById(int id){
+        return requestRepo.findById(id).orElse(null);
+    }
+
+    public void save(User user, UserRequest request) {
+        request.setUser(user);
+        request.setDate(Calendar.getInstance().getTime());
+        for(Food food : request.getRequestedFoods()){
+            if(!foodRepo.findById(food.getId()).isPresent()){
+                throw new NotFoundException("Food with id = " + food.getId() + " not found.");
+            }
+        }
+        requestRepo.save(request);
+    }
+
+    public void deleteById(int id) {
+        requestRepo.deleteById(id);
+    }
+
+    public List<Food> findAllRequestedFoodByDate(Date date){
+        List<Food> requestedFoods = new ArrayList<>();
+        for (Integer foodId : requestRepo.findAllRequestedFoodByDateEquals(date)){
+            requestedFoods.add(foodRepo.findById(foodId).get());
+        }
+        return requestedFoods;
+    }
+}

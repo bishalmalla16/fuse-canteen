@@ -1,7 +1,7 @@
 package com.fusemachine.controller;
 
-import com.fusemachine.entity.Role;
 import com.fusemachine.entity.User;
+import com.fusemachine.exceptions.NotFoundException;
 import com.fusemachine.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +15,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/")
+    @GetMapping
     public List<User> findAll(){
         return userService.findAll();
     }
@@ -24,14 +24,13 @@ public class UserController {
     public User findById(@PathVariable int id){
         User user = userService.findById(id);
         if(user == null) {
-            // handle exc
+            throw new NotFoundException("User with id = " + id + " not found.");
         }
         return user;
     }
 
-    @PostMapping("/")
+    @PostMapping
     public void save(@RequestBody User user){
-//        user.setRole(new Role("ROLE_EMPLOYEE"));
         userService.save(user);
     }
 

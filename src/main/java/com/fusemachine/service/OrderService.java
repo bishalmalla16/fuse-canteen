@@ -3,6 +3,7 @@ package com.fusemachine.service;
 import com.fusemachine.entity.Food;
 import com.fusemachine.entity.User;
 import com.fusemachine.entity.UserOrder;
+import com.fusemachine.exceptions.NotFoundException;
 import com.fusemachine.repo.FoodRepository;
 import com.fusemachine.repo.OrderRepository;
 import com.fusemachine.repo.UserRepository;
@@ -51,6 +52,8 @@ public class OrderService {
         Set<Food> foods = order.getFoods();
         double totalPrice = 0;
         for (Food food : foods) {
+            if(!foodRepo.findById(food.getId()).isPresent())
+                throw new NotFoundException("Food with id = " + food.getId() + " not found.");
             food = foodRepo.findById(food.getId()).get();
             totalPrice += food.getPrice();
         }

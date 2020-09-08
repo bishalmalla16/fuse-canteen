@@ -7,6 +7,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class User {
@@ -34,6 +35,10 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<UserOrder> orders;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<UserRequest> requests;
 
     public User() {
     }
@@ -84,5 +89,13 @@ public class User {
 
     public void setOrders(List<UserOrder> orders) {
         this.orders = orders;
+    }
+
+    public List<UserRequest> getRequests() {
+        return requests;
+    }
+
+    public void setRequests(List<UserRequest> requests) {
+        this.requests = requests;
     }
 }
