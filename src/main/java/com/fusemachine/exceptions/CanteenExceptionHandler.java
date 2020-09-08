@@ -44,4 +44,15 @@ public class CanteenExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(value = InvalidCredentialsException.class)
+    public ResponseEntity<ApiError> handleException(InvalidCredentialsException ex){
+        ApiError error = new ApiError();
+
+        error.setStatus(HttpStatus.UNAUTHORIZED);
+        error.setMessage(ex.getMessage());
+        error.setTimeStamp(LocalDateTime.now());
+
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
+
 }

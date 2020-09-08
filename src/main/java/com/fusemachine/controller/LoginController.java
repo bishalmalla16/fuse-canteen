@@ -2,6 +2,7 @@ package com.fusemachine.controller;
 
 import com.fusemachine.entity.AuthenticationRequest;
 import com.fusemachine.entity.AuthenticationResponse;
+import com.fusemachine.exceptions.InvalidCredentialsException;
 import com.fusemachine.service.FuseUserDetailsService;
 import com.fusemachine.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,14 +34,14 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest authenticationRequest) throws Exception{
+    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest authenticationRequest) throws RuntimeException{
         try{
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     authenticationRequest.getUsername(),
                     authenticationRequest.getPassword()
             ));
         }catch (BadCredentialsException ex){
-            throw new Exception("Incorrect username/password");
+            throw new InvalidCredentialsException("Incorrect username/password");
         }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
