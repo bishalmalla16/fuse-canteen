@@ -109,14 +109,18 @@ public class OrderController {
         orderService.deleteById(id);
     }
 
-    @GetMapping("/users/{id}/orders")
-    public List<UserOrder> findAll(@PathVariable int id, @RequestParam(required = false, defaultValue = "today") Date date){
+    @GetMapping("/users/{userId}/orders")
+    public List<UserOrder> findAll(@PathVariable int userId, @RequestParam(required = false, defaultValue = "today") Date date){
+        User user = userService.findById(userId);
+        if(user == null){
+            throw new NotFoundException("User with id = " + userId + " not found.");
+        }
         Date startTime;
         Date endTime;
         try {
             startTime = dateTimeFormatter.parse(dateFormatter.format(date) + " 00:00:00");
             endTime = dateTimeFormatter.parse(dateFormatter.format(date) + " 23:59:59");
-            return orderService.findAllByUserIdAndDateBetween(id, startTime, endTime);
+            return orderService.findAllByUserIdAndDateBetween(userId, startTime, endTime);
         }catch (ParseException ex){
             logger.error(ex.getMessage());
             return null;
@@ -152,9 +156,12 @@ public class OrderController {
         if(user == null){
             throw new NotFoundException("User with id = " + userId + " not found.");
         }
-        if(!orderService.findAllByUserId(userId).contains(orderService.findById(id))){
+        UserOrder curOrder = orderService.findById(id);
+        if(curOrder == null || curOrder.getUser().getId() == userId){
             throw new NotFoundException("This User doesn't have order with id = " + id);
         }
+        if(!curOrder.getStatus().equals("PENDING"))
+            throw new NotFoundException("Order cannot be altered");
         if(order.getFoods().isEmpty())
             throw new NotFoundException("Can't place an empty order.");
         order.setId(id);
@@ -167,9 +174,12 @@ public class OrderController {
         if(user == null){
             throw new NotFoundException("User with id = " + userId + " not found.");
         }
-        if(!orderService.findAllByUserId(userId).contains(orderService.findById(id))){
+        UserOrder curOrder = orderService.findById(id);
+        if(curOrder == null || curOrder.getUser().getId() == userId){
             throw new NotFoundException("This User doesn't have order with id = " + id);
         }
+        if(!curOrder.getStatus().equals("PENDING"))
+            throw new NotFoundException("Order cannot be altered");
         orderService.deleteById(id);
     }
 
