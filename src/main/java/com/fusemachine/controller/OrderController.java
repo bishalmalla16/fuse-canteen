@@ -2,7 +2,9 @@ package com.fusemachine.controller;
 
 import com.fusemachine.entity.UserOrder;
 import com.fusemachine.entity.User;
-import com.fusemachine.exceptions.NotFoundException;
+import com.fusemachine.exceptions.CannotAlterException;
+import com.fusemachine.exceptions.InvalidArgumentException;
+import com.fusemachine.exceptions.ResourcesNotFoundException;
 import com.fusemachine.service.FoodService;
 import com.fusemachine.service.OrderService;
 import com.fusemachine.service.UserService;
@@ -75,7 +77,7 @@ public class OrderController {
     public UserOrder findById(@PathVariable int id){
         UserOrder order = orderService.findById(id);
         if(order == null){
-            throw new NotFoundException("Order with id = " + id + " not found.");
+            throw new ResourcesNotFoundException("Order with id = " + id + " not found.");
         }
         return order;
     }
@@ -84,7 +86,7 @@ public class OrderController {
     public void updateOrderStatus(@PathVariable int id, @RequestBody JSONObject object){
         UserOrder order = orderService.findById(id);
         if(order == null){
-            throw new NotFoundException("Order with id = " + id + " not found.");
+            throw new ResourcesNotFoundException("Order with id = " + id + " not found.");
         }
         String statusName = object.get("status").toString();
         UserOrder.OrderStatus status;
@@ -95,7 +97,7 @@ public class OrderController {
         else if(statusName.equalsIgnoreCase("READY"))
             status = UserOrder.OrderStatus.READY;
         else
-            throw new IllegalArgumentException("Invalid status");
+            throw new InvalidArgumentException("Invalid Status");
 
         order.setStatus(status.name());
         orderService.save(order);
@@ -105,7 +107,7 @@ public class OrderController {
     public void deleteById(@PathVariable int id){
         UserOrder order = orderService.findById(id);
         if(order == null){
-            throw new NotFoundException("Order with id = " + id + " not found.");
+            throw new ResourcesNotFoundException("Order with id = " + id + " not found.");
         }
         orderService.deleteById(id);
     }
@@ -114,7 +116,7 @@ public class OrderController {
     public List<UserOrder> findAll(@PathVariable int userId, @RequestParam(required = false, defaultValue = "today") Date date){
         User user = userService.findById(userId);
         if(user == null){
-            throw new NotFoundException("User with id = " + userId + " not found.");
+            throw new ResourcesNotFoundException("User with id = " + userId + " not found.");
         }
         Date startTime;
         Date endTime;
@@ -132,11 +134,11 @@ public class OrderController {
     public UserOrder findByOrderId(@PathVariable int userId, @PathVariable int id){
         User user = userService.findById(userId);
         if(user == null){
-            throw new NotFoundException("User with id = " + userId + " not found.");
+            throw new ResourcesNotFoundException("User with id = " + userId + " not found.");
         }
         UserOrder curOrder = orderService.findById(id);
         if(curOrder == null || curOrder.getUser() != user){
-            throw new NotFoundException("This User doesn't have order with id = " + id);
+            throw new ResourcesNotFoundException("This User doesn't have order with id = " + id);
         }
         return orderService.findById(id);
     }
@@ -145,10 +147,10 @@ public class OrderController {
     public void save(@RequestBody UserOrder order, @PathVariable int userId){
         User user = userService.findById(userId);
         if(user == null){
-            throw new NotFoundException("User with id = " + userId + " not found.");
+            throw new ResourcesNotFoundException("User with id = " + userId + " not found.");
         }
         if(order.getOrderItems().isEmpty())
-            throw new NotFoundException("Can't place an empty order.");
+            throw new InvalidArgumentException("Can't place an empty order.");
 
         order.setCreatedAt(Calendar.getInstance().getTime());
         orderService.save(user, order);
@@ -158,21 +160,18 @@ public class OrderController {
     public void updateOrder(@PathVariable int userId, @PathVariable int id, @RequestBody UserOrder order){
         User user = userService.findById(userId);
         if(user == null){
-            throw new NotFoundException("User with id = " + userId + " not found.");
+            throw new ResourcesNotFoundException("User with id = " + userId + " not found.");
         }
         UserOrder curOrder = orderService.findById(id);
         if(curOrder == null || curOrder.getUser() != user){
-            throw new NotFoundException("This User doesn't have order with id = " + id);
+            throw new ResourcesNotFoundException("This User doesn't have order with id = " + id);
         }
         if(!curOrder.getStatus().equals("PENDING"))
-            throw new NotFoundException("Order cannot be altered");
+            throw new CannotAlterException("Order cannot be altered now.");
         if(order.getOrderItems().isEmpty())
-            throw new NotFoundException("Can't place an empty order.");
+            throw new InvalidArgumentException("Can't place an empty order.");
 
         order.setId(id);
-//        order.setCreatedAt(curOrder.getCreatedAt());
-//        order.setUser(user);
-//        order.setStatus(curOrder.getStatus());
         orderService.update(curOrder, order);
     }
 
@@ -180,14 +179,14 @@ public class OrderController {
     public void deleteOrder(@PathVariable int userId, @PathVariable int id){
         User user = userService.findById(userId);
         if(user == null){
-            throw new NotFoundException("User with id = " + userId + " not found.");
+            throw new ResourcesNotFoundException("User with id = " + userId + " not found.");
         }
         UserOrder curOrder = orderService.findById(id);
         if(curOrder == null || curOrder.getUser().getId() != userId){
-            throw new NotFoundException("This User doesn't have order with id = " + id);
+            throw new ResourcesNotFoundException("This User doesn't have order with id = " + id);
         }
         if(!curOrder.getStatus().equals("PENDING"))
-            throw new NotFoundException("Order cannot be altered");
+            throw new CannotAlterException("Order cannot be altered");
         orderService.deleteById(id);
     }
 

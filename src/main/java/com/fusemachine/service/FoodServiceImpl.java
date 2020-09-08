@@ -21,6 +21,7 @@ public class FoodServiceImpl implements FoodService {
     }
 
     @Override
+    @Transactional
     public Food findByName(String name) {
         return foodRepo.findByName(name).orElse(null);
     }

@@ -1,7 +1,7 @@
 package com.fusemachine.controller;
 
 import com.fusemachine.entity.Food;
-import com.fusemachine.exceptions.ItemNotFoundException;
+import com.fusemachine.exceptions.ResourcesNotFoundException;
 import com.fusemachine.service.FoodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +24,7 @@ public class FoodController {
     public Food findById(@PathVariable int id){
         Food food = foodService.findById(id);
         if(food == null){
-            throw new ItemNotFoundException("Item with id = " + id + " not found.");
+            throw new ResourcesNotFoundException("Item with id = " + id + " not found.");
         }
         return food;
     }
@@ -38,7 +38,7 @@ public class FoodController {
     @PutMapping("/foods/{id}")
     public void update(@RequestBody Food food, @PathVariable int id){
         if(foodService.findById(id) == null){
-            throw new ItemNotFoundException("Item with id = " + id + " not found.");
+            throw new ResourcesNotFoundException("Item with id = " + id + " not found.");
         }
         food.setId(id);
         foodService.save(food);
@@ -47,7 +47,7 @@ public class FoodController {
     @DeleteMapping("/foods/{id}")
     public  void  deleteById(@PathVariable int id){
         if(foodService.findById(id) == null){
-            throw new ItemNotFoundException("Item with id = " + id + " not found.");
+            throw new ResourcesNotFoundException("Item with id = " + id + " not found.");
         }
         foodService.deleteById(id);
     }

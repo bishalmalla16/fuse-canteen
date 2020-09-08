@@ -11,8 +11,19 @@ import java.time.LocalDateTime;
 @ControllerAdvice
 public class CanteenExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(ItemNotFoundException.class)
-    public ResponseEntity<ApiError> handleException(ItemNotFoundException ex){
+    @ExceptionHandler(value = InvalidArgumentException.class)
+    public ResponseEntity<ApiError> handleException(InvalidArgumentException ex){
+        ApiError error = new ApiError();
+
+        error.setStatus(HttpStatus.FORBIDDEN);
+        error.setMessage(ex.getMessage());
+        error.setTimeStamp(LocalDateTime.now());
+
+        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(value = ResourcesNotFoundException.class)
+    public ResponseEntity<ApiError> handleException(ResourcesNotFoundException ex){
         ApiError error = new ApiError();
 
         error.setStatus(HttpStatus.NOT_FOUND);
@@ -22,26 +33,15 @@ public class CanteenExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(value = MenuNotFoundException.class)
-    public ResponseEntity<ApiError> handleException(MenuNotFoundException ex){
+    @ExceptionHandler(value = CannotAlterException.class)
+    public ResponseEntity<ApiError> handleException(CannotAlterException ex){
         ApiError error = new ApiError();
 
-        error.setStatus(HttpStatus.NOT_FOUND);
+        error.setStatus(HttpStatus.BAD_REQUEST);
         error.setMessage(ex.getMessage());
         error.setTimeStamp(LocalDateTime.now());
 
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(value = NotFoundException.class)
-    public ResponseEntity<ApiError> handleException(NotFoundException ex){
-        ApiError error = new ApiError();
-
-        error.setStatus(HttpStatus.NOT_FOUND);
-        error.setMessage(ex.getMessage());
-        error.setTimeStamp(LocalDateTime.now());
-
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
 }

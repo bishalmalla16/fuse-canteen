@@ -5,6 +5,7 @@ import com.fusemachine.entity.Menu;
 import com.fusemachine.repo.MenuRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.Set;
@@ -28,10 +29,12 @@ public class MenuService {
         return menuRepo.findByDateEquals(date).orElse(null);
     }
 
+    @Transactional
     public void save(Menu menu){
         menuRepo.save(menu);
     }
 
+    @Transactional
     public boolean addItem(Menu menu, Food food){
         if(!menu.addItem(food)){
             return false;
@@ -40,6 +43,7 @@ public class MenuService {
         return true;
     }
 
+    @Transactional
     public boolean removeItem(Menu menu, Food food){
         if(!menu.removeItem(food)){
             return false;

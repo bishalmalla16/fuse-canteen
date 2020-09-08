@@ -11,6 +11,7 @@ public class OrderItemService {
     @Autowired
     private OrderItemRepository orderItemRepo;
 
+    @Transactional
     public void deleteById(int id) {
         orderItemRepo.deleteById(id);
     }
@@ -19,6 +20,7 @@ public class OrderItemService {
         return orderItemRepo.findById(id).orElse(null);
     }
 
+    @Transactional
     public void save(OrderItem orderItem) {
         orderItemRepo.save(orderItem);
     }

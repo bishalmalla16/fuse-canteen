@@ -1,7 +1,7 @@
 package com.fusemachine.controller;
 
 import com.fusemachine.entity.User;
-import com.fusemachine.exceptions.NotFoundException;
+import com.fusemachine.exceptions.ResourcesNotFoundException;
 import com.fusemachine.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +24,7 @@ public class UserController {
     public User findById(@PathVariable int id){
         User user = userService.findById(id);
         if(user == null) {
-            throw new NotFoundException("User with id = " + id + " not found.");
+            throw new ResourcesNotFoundException("User with id = " + id + " not found.");
         }
         return user;
     }
@@ -34,8 +34,17 @@ public class UserController {
         userService.save(user);
     }
 
+    @PutMapping("/{id}")
+    public void save(@RequestBody User user, @PathVariable int id){
+        user.setId(id);
+        userService.save(user);
+    }
+
     @DeleteMapping("/{id}")
     public void deleteById(@PathVariable int id){
+        User user = userService.findById(id);
+        if(user == null)
+            throw new ResourcesNotFoundException("User with id = " + id + " not found.");
         userService.deleteById(id);
     }
 

@@ -28,4 +28,15 @@ public class RoleController {
         roleService.save(role);
     }
 
+    @PutMapping("/{id}")
+    public void save(@RequestBody Role role, @PathVariable int id){
+        role.setId(id);
+        roleService.save(role);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteById(@PathVariable int id){
+        roleService.deleteById(id);
+    }
+
 }

@@ -2,8 +2,8 @@ package com.fusemachine.controller;
 
 import com.fusemachine.entity.Food;
 import com.fusemachine.entity.Menu;
-import com.fusemachine.exceptions.ItemNotFoundException;
-import com.fusemachine.exceptions.MenuNotFoundException;
+import com.fusemachine.exceptions.InvalidArgumentException;
+import com.fusemachine.exceptions.ResourcesNotFoundException;
 import com.fusemachine.service.FoodService;
 import com.fusemachine.service.MenuService;
 import org.slf4j.Logger;
@@ -57,7 +57,7 @@ public class MenuController {
         logger.info("Menu date: " + date);
         Menu menu = menuService.findByDate(date);
         if(menu == null){
-            throw new MenuNotFoundException("Menu not found for date : " + formatter.format(date));
+            throw new ResourcesNotFoundException("Menu not found for date : " + formatter.format(date));
         }
         return menu;
     }
@@ -66,7 +66,7 @@ public class MenuController {
     public Menu findById(@PathVariable int id){
         Menu menu = menuService.findById(id);
         if(menu == null){
-            throw new MenuNotFoundException("Menu with id = " + id + " not found.");
+            throw new ResourcesNotFoundException("Menu with id = " + id + " not found.");
         }
         return menu;
     }
@@ -75,8 +75,7 @@ public class MenuController {
     public void save(@RequestBody Menu menu){
         Menu todayMenu = menuService.findByDate(Calendar.getInstance().getTime());
         if(todayMenu != null) {
-            //To be changed to MenuAlreadyExistException
-            throw new MenuNotFoundException("Menu Already Exist for today.");
+            throw new InvalidArgumentException("Menu Already Exist for today.");
         }
         menu.setDate(Calendar.getInstance().getTime());
         menuService.save(menu);
@@ -86,7 +85,7 @@ public class MenuController {
     public void updateMenu(@RequestBody Menu menu){
         Menu todayMenu = menuService.findByDate(Calendar.getInstance().getTime());
         if(todayMenu == null) {
-            throw new MenuNotFoundException("Menu not found for today.");
+            throw new ResourcesNotFoundException("Menu not found for today.");
         }
         menu.setId(todayMenu.getId());
         menu.setDate(todayMenu.getDate());
@@ -98,7 +97,7 @@ public class MenuController {
     public Set<Food> findAllItemsById(){
         Menu menu = menuService.findByDate(Calendar.getInstance().getTime());
         if(menu == null){
-            throw new MenuNotFoundException("Today's Menu not found.");
+            throw new ResourcesNotFoundException("Today's Menu not found.");
         }
         return menuService.findFoodsById(menu.getId());
     }
@@ -107,15 +106,14 @@ public class MenuController {
     public void addItem(@RequestParam(defaultValue = "") String item){
         Menu menu = menuService.findByDate(Calendar.getInstance().getTime());
         if(menu == null){
-            throw new MenuNotFoundException("Today's menu not found.");
+            throw new ResourcesNotFoundException("Today's menu not found.");
         }
         Food food = foodService.findByName(item);
         if(food == null){
-            throw new ItemNotFoundException("Item with name = " + item + " not found.");
+            throw new ResourcesNotFoundException("Item with name = " + item + " not found.");
         }
         if(!menuService.addItem(menu, food)){
-            //To be changed
-            throw new ItemNotFoundException("Item with name = " + item + " already in menu.");
+            throw new InvalidArgumentException("Item with name = " + item + " already in menu.");
         }
     }
 
@@ -123,11 +121,11 @@ public class MenuController {
     public void removeItem(@RequestParam(defaultValue = "") String item){
         Menu menu = menuService.findByDate(Calendar.getInstance().getTime());
         if(menu == null){
-            throw new MenuNotFoundException("Today's menu not found.");
+            throw new ResourcesNotFoundException("Today's menu not found.");
         }
         Food food = foodService.findByName(item);
         if(food == null || !menuService.removeItem(menu, food)){
-            throw new ItemNotFoundException("Item with name = " + item + " not available in menu.");
+            throw new InvalidArgumentException("Item with name = " + item + " not available in menu.");
         }
     }
 }

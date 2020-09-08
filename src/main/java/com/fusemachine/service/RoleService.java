@@ -4,6 +4,7 @@ import com.fusemachine.entity.Role;
 import com.fusemachine.repo.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,7 +21,13 @@ public class RoleService {
         return roleRepo.findById(id).orElse(null);
     }
 
+    @Transactional
     public void save(Role role){
         roleRepo.save(role);
+    }
+
+    @Transactional
+    public void deleteById(int id){
+        roleRepo.deleteById(id);
     }
 }

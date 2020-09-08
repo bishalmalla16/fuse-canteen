@@ -4,7 +4,8 @@ import com.fusemachine.entity.Food;
 import com.fusemachine.entity.OrderItem;
 import com.fusemachine.entity.User;
 import com.fusemachine.entity.UserOrder;
-import com.fusemachine.exceptions.NotFoundException;
+import com.fusemachine.exceptions.InvalidArgumentException;
+import com.fusemachine.exceptions.ResourcesNotFoundException;
 import com.fusemachine.repo.FoodRepository;
 import com.fusemachine.repo.OrderRepository;
 import org.slf4j.Logger;
@@ -50,10 +51,12 @@ public class OrderService {
         return orderRepo.findAllByScheduledAtBetween(startTime, endTime, Sort.by("scheduledAt").and(Sort.by("createdAt")));
     }
 
+    @Transactional
     public void save(UserOrder userOrder){
         orderRepo.save(userOrder);
     }
 
+    @Transactional
     public void save(User user, UserOrder order) {
         order.setUser(user);
         order.setStatus(UserOrder.OrderStatus.PENDING.name());
@@ -64,14 +67,14 @@ public class OrderService {
             item.setOrder(order);
             Food food = item.getFood();
             if(food == null)
-                throw new NotFoundException("Food not found.");
+                throw new ResourcesNotFoundException("Food not found.");
 
             if(!foodRepo.findById(food.getId()).isPresent())
-                throw new NotFoundException("Food with id = " + food.getId() + " not found.");
+                throw new ResourcesNotFoundException("Food with id = " + food.getId() + " not found.");
 
             int quantity = item.getQuantity();
             if(quantity <= 0)
-                throw new NotFoundException("Quantity cannot be less or equals to 0.");
+                throw new InvalidArgumentException("Quantity cannot be less or equals to 0.");
 
             food = foodRepo.findById(food.getId()).get();
             totalPrice += food.getPrice() * quantity;
@@ -92,10 +95,10 @@ public class OrderService {
             Food food = item.getFood();
 
             if(food == null)
-                throw new NotFoundException("Food not found.");
+                throw new ResourcesNotFoundException("Food not found.");
 
             if(!foodRepo.findById(food.getId()).isPresent())
-                throw new NotFoundException("Food with id = " + food.getId() + " not found.");
+                throw new ResourcesNotFoundException("Food with id = " + food.getId() + " not found.");
 
             item.setOrder(curOrder);
 
@@ -103,7 +106,7 @@ public class OrderService {
             item.setFood(food);
             int quantity = item.getQuantity();
             if(quantity <= 0)
-                throw new NotFoundException("Quantity cannot be less or equals to 0.");
+                throw new InvalidArgumentException("Quantity cannot be less or equals to 0.");
 
             totalPrice += food.getPrice() * quantity;
         }
@@ -131,6 +134,7 @@ public class OrderService {
         orderRepo.save(curOrder);
     }
 
+    @Transactional
     public void deleteById(int id) {
         orderRepo.deleteById(id);
     }

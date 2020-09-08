@@ -2,7 +2,9 @@ package com.fusemachine.controller;
 
 import com.fusemachine.entity.User;
 import com.fusemachine.entity.UserRequest;
-import com.fusemachine.exceptions.NotFoundException;
+import com.fusemachine.exceptions.CannotAlterException;
+import com.fusemachine.exceptions.InvalidArgumentException;
+import com.fusemachine.exceptions.ResourcesNotFoundException;
 import com.fusemachine.service.RequestItemService;
 import com.fusemachine.service.UserService;
 import org.json.simple.JSONArray;
@@ -65,7 +67,7 @@ public class RequestItemController {
     public UserRequest findRequestByIdAndDate(@PathVariable int id, @RequestParam(required = false, defaultValue = "today") Date date){
         UserRequest request = requestService.findByUserIdAndDate(id, date);
         if(request == null){
-            throw new NotFoundException("User Request not found for today.");
+            throw new ResourcesNotFoundException("User Request not found for today.");
         }
         return request;
     }
@@ -74,12 +76,13 @@ public class RequestItemController {
     public void addFoodRequest(@PathVariable int id, @RequestBody UserRequest request){
         User user = userService.findById(id);
         if(user == null) {
-            throw new NotFoundException("User with id = " + id + " not found.");
+            throw new ResourcesNotFoundException("User with id = " + id + " not found.");
         }
         if(request.getRequestedFoods().isEmpty())
-            throw new NotFoundException("Can't request empty list of items.");
+            throw new InvalidArgumentException("Can't request empty list of items.");
+
         if(requestService.findByUserIdAndDate(id, Calendar.getInstance().getTime()) != null){
-            throw new NotFoundException("You have already made a request today.");
+            throw new CannotAlterException("You have already made a request today.");
         }
         requestService.save(user, request);
     }
@@ -88,14 +91,14 @@ public class RequestItemController {
     public void updateFoodRequest(@PathVariable int id, @RequestBody UserRequest request){
         User user = userService.findById(id);
         if(user == null) {
-            throw new NotFoundException("User with id = " + id + " not found.");
+            throw new ResourcesNotFoundException("User with id = " + id + " not found.");
         }
         if(request.getRequestedFoods().isEmpty()){
-            throw new NotFoundException("Can't request empty list of items.");
+            throw new InvalidArgumentException("Can't request empty list of items.");
         }
         UserRequest curRequest = requestService.findByUserIdAndDate(id, Calendar.getInstance().getTime());
         if(curRequest == null)
-            throw new NotFoundException("This user haven't made the request today.");
+            throw new ResourcesNotFoundException("Item request not found for today.");
 
         request.setId(curRequest.getId());
         requestService.save(user, request);
@@ -105,11 +108,11 @@ public class RequestItemController {
     public void deleteFoodRequest(@PathVariable int id){
         User user = userService.findById(id);
         if(user == null) {
-            throw new NotFoundException("User with id = " + id + " not found.");
+            throw new ResourcesNotFoundException("User with id = " + id + " not found.");
         }
         UserRequest curRequest = requestService.findByUserIdAndDate(id, Calendar.getInstance().getTime());
         if(curRequest == null)
-            throw new NotFoundException("This user haven't made the request today.");
+            throw new ResourcesNotFoundException("Item request not found for today.");
 
         requestService.deleteById(curRequest.getId());
     }
