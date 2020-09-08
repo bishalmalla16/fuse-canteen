@@ -1,7 +1,6 @@
 package com.fusemachine.entity;
 
 import javax.persistence.*;
-import java.util.Objects;
 
 @Entity
 public class Role {

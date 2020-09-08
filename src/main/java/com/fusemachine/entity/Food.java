@@ -1,6 +1,5 @@
 package com.fusemachine.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -26,12 +25,12 @@ public class Food {
                 inverseJoinColumns = @JoinColumn(name = "menu_id"))
     private Set<Menu> menus;
 
-    @ManyToMany
-    @JsonBackReference
-    @JoinTable(name = "order_item",
-            joinColumns = @JoinColumn(name = "food_id"),
-            inverseJoinColumns = @JoinColumn(name = "order_id"))
-    private Set<UserOrder> orders;
+//    @ManyToMany
+//    @JsonBackReference
+//    @JoinTable(name = "order_item",
+//            joinColumns = @JoinColumn(name = "food_id"),
+//            inverseJoinColumns = @JoinColumn(name = "order_id"))
+//    private Set<UserOrder> orders;
 
     @ManyToMany
     @JsonIgnore
@@ -79,13 +78,13 @@ public class Food {
         this.menus = menus;
     }
 
-    public Set<UserOrder> getOrders() {
-        return orders;
-    }
-
-    public void setOrders(Set<UserOrder> orders) {
-        this.orders = orders;
-    }
+//    public Set<UserOrder> getOrders() {
+//        return orders;
+//    }
+//
+//    public void setOrders(Set<UserOrder> orders) {
+//        this.orders = orders;
+//    }
 
     public Set<UserRequest> getRequests() {
         return requests;
@@ -108,4 +107,5 @@ public class Food {
     public int hashCode() {
         return Objects.hash(id, name);
     }
+
 }

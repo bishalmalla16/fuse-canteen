@@ -147,7 +147,7 @@ public class OrderController {
         if(user == null){
             throw new NotFoundException("User with id = " + userId + " not found.");
         }
-        if(order.getFoods().isEmpty())
+        if(order.getOrderItems().isEmpty())
             throw new NotFoundException("Can't place an empty order.");
 
         order.setCreatedAt(Calendar.getInstance().getTime());
@@ -166,12 +166,14 @@ public class OrderController {
         }
         if(!curOrder.getStatus().equals("PENDING"))
             throw new NotFoundException("Order cannot be altered");
-        if(order.getFoods().isEmpty())
+        if(order.getOrderItems().isEmpty())
             throw new NotFoundException("Can't place an empty order.");
 
         order.setId(id);
-        order.setCreatedAt(curOrder.getCreatedAt());
-        orderService.save(user, order);
+//        order.setCreatedAt(curOrder.getCreatedAt());
+//        order.setUser(user);
+//        order.setStatus(curOrder.getStatus());
+        orderService.update(curOrder, order);
     }
 
     @DeleteMapping("/users/{userId}/orders/{id}")

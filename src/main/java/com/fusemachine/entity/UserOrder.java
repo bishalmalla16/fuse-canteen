@@ -35,14 +35,11 @@ public class UserOrder {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToMany
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "order")
     @JsonManagedReference
     @NotNull
     @JsonIgnore
-    @JoinTable(name = "order_item",
-                joinColumns = @JoinColumn(name = "order_id"),
-                inverseJoinColumns = @JoinColumn(name = "food_id"))
-    private Set<Food> foods;
+    private Set<OrderItem> orderItems;
 
     @Column(name = "total_price")
     private double totalPrice;
@@ -90,12 +87,12 @@ public class UserOrder {
         this.user = user;
     }
 
-    public Set<Food> getFoods() {
-        return foods;
+    public Set<OrderItem> getOrderItems() {
+        return orderItems;
     }
 
-    public void setFoods(Set<Food> foods) {
-        this.foods = foods;
+    public void setOrderItems(Set<OrderItem> orderItems) {
+        this.orderItems = orderItems;
     }
 
     public double getTotalPrice() {
