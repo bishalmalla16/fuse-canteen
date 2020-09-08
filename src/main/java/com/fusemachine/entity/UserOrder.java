@@ -17,7 +17,10 @@ public class UserOrder {
     private int id;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date date;
+    private Date createdAt;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date scheduledAt;
 
     public enum OrderStatus {
         PENDING,
@@ -55,12 +58,20 @@ public class UserOrder {
         this.id = id;
     }
 
-    public Date getDate() {
-        return date;
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getScheduledAt() {
+        return scheduledAt;
+    }
+
+    public void setScheduledAt(Date scheduledAt) {
+        this.scheduledAt = scheduledAt;
     }
 
     public String getStatus() {

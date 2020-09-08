@@ -6,11 +6,10 @@ import com.fusemachine.entity.UserOrder;
 import com.fusemachine.exceptions.NotFoundException;
 import com.fusemachine.repo.FoodRepository;
 import com.fusemachine.repo.OrderRepository;
-import com.fusemachine.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -37,8 +36,12 @@ public class OrderService {
         return orderRepo.findAllByUserId(userId);
     }
 
-    public List<UserOrder> findAllByUserIdAndDate(int userId, Date date) {
-        return orderRepo.findAllByUserIdAndDateEquals(userId, date);
+    public List<UserOrder> findAllByUserIdAndScheduledBetween(int id, Date startTime, Date endTime) {
+        return orderRepo.findAllByUserIdAndScheduledAtBetween(id, startTime, endTime, Sort.by("scheduledAt").and(Sort.by("createdAt")));
+    }
+
+    public List<UserOrder> findAllByScheduledBetween(Date startTime, Date endTime) {
+        return orderRepo.findAllByScheduledAtBetween(startTime, endTime, Sort.by("scheduledAt").and(Sort.by("createdAt")));
     }
 
     public void save(UserOrder userOrder){
@@ -64,17 +67,5 @@ public class OrderService {
     public void deleteById(int id) {
         orderRepo.deleteById(id);
     }
-
-    public List<UserOrder> findAllByUserIdAndDateBetween(int id, Date startTime, Date endTime) {
-        return orderRepo.findAllByUserIdAndDateBetween(id, startTime, endTime);
-    }
-
-    public List<UserOrder> findAllByDateBetween(Date startTime, Date endTime) {
-        return orderRepo.findAllByDateBetween(startTime, endTime);
-    }
-
-//    public double findTotalPrice(int id){
-//        return orderRepo.findTotalPrice(id);
-//    }
 
 }
