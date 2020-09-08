@@ -10,8 +10,7 @@ import java.util.List;
 
 public interface RequestItemRepository extends JpaRepository<UserRequest, Integer> {
     UserRequest findByUserIdAndDateEquals(int id, Date date);
-    List<UserRequest> findAllByDateEquals(Date date);
 
-    @Query(value = "select reqItem.food_id from user_request r INNER join request_item reqItem ON r.id = reqItem.request_id where r.date = :myDate group by reqItem.food_id order by count(reqItem.request_id) desc", nativeQuery = true)
-    List<Integer> findAllRequestedFoodByDateEquals(@Param("myDate") Date myDate);
+    @Query(value = "select reqItem.food_id, count(reqItem.request_id) from user_request r INNER join request_item reqItem ON r.id = reqItem.request_id where r.date = :myDate group by reqItem.food_id order by count(reqItem.request_id) desc", nativeQuery = true)
+    List<Integer[]> findAllRequestedFoodByDateEquals(@Param("myDate") Date myDate);
 }

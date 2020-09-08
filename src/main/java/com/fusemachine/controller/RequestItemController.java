@@ -1,26 +1,23 @@
 package com.fusemachine.controller;
 
-import com.fusemachine.entity.Food;
 import com.fusemachine.entity.User;
 import com.fusemachine.entity.UserRequest;
 import com.fusemachine.exceptions.NotFoundException;
 import com.fusemachine.service.RequestItemService;
 import com.fusemachine.service.UserService;
+import org.json.simple.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.data.jpa.repository.Temporal;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.TemporalType;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -60,7 +57,7 @@ public class RequestItemController {
 
 
     @GetMapping("/requests/foods")
-    public List<Food> findAllRequestedFoodByDate(@RequestParam(required = false, defaultValue = "today") Date date) throws ParseException {
+    public JSONArray findAllRequestedFoodByDate(@RequestParam(required = false, defaultValue = "today") Date date) throws ParseException {
         return requestService.findAllRequestedFoodByDate(date);
     }
 

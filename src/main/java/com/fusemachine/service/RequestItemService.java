@@ -6,6 +6,8 @@ import com.fusemachine.entity.UserRequest;
 import com.fusemachine.exceptions.NotFoundException;
 import com.fusemachine.repo.FoodRepository;
 import com.fusemachine.repo.RequestItemRepository;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,11 +49,17 @@ public class RequestItemService {
         requestRepo.deleteById(id);
     }
 
-    public List<Food> findAllRequestedFoodByDate(Date date){
-        List<Food> requestedFoods = new ArrayList<>();
-        for (Integer foodId : requestRepo.findAllRequestedFoodByDateEquals(date)){
-            requestedFoods.add(foodRepo.findById(foodId).get());
+    public JSONArray findAllRequestedFoodByDate(Date date){
+        JSONArray jsonArray = new JSONArray();
+        for (Integer[] requestItem : requestRepo.findAllRequestedFoodByDateEquals(date)){
+            Food food = foodRepo.findById(requestItem[0]).get();
+            int count = requestItem[1];
+            JSONObject object = new JSONObject();
+            object.put("food", food);
+            object.put("requestCount", count);
+            jsonArray.add(object);
+
         }
-        return requestedFoods;
+        return jsonArray;
     }
 }
