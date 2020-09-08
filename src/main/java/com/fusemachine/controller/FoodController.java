@@ -9,18 +9,18 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/foods")
 public class FoodController {
 
     @Autowired
     private FoodService foodService;
 
-    @GetMapping("/foods")
+    @GetMapping
     public List<Food> findAll(){
         return foodService.findAll();
     }
 
-    @GetMapping("/foods/{id}")
+    @GetMapping("/{id}")
     public Food findById(@PathVariable int id){
         Food food = foodService.findById(id);
         if(food == null){
@@ -29,13 +29,13 @@ public class FoodController {
         return food;
     }
 
-    @PostMapping("/foods")
+    @PostMapping
     public void save(@RequestBody Food food){
         food.setId(0);
         foodService.save(food);
     }
 
-    @PutMapping("/foods/{id}")
+    @PutMapping("/{id}")
     public void update(@RequestBody Food food, @PathVariable int id){
         if(foodService.findById(id) == null){
             throw new ResourcesNotFoundException("Item with id = " + id + " not found.");
@@ -44,7 +44,7 @@ public class FoodController {
         foodService.save(food);
     }
 
-    @DeleteMapping("/foods/{id}")
+    @DeleteMapping("/{id}")
     public  void  deleteById(@PathVariable int id){
         if(foodService.findById(id) == null){
             throw new ResourcesNotFoundException("Item with id = " + id + " not found.");

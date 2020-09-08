@@ -28,6 +28,8 @@ public class User {
     @Size(max = 16)
     private String password;
 
+    private boolean enabled;
+
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;
@@ -73,6 +75,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public Role getRole() {
