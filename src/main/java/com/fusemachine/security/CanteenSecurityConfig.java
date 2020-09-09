@@ -41,6 +41,7 @@ public class CanteenSecurityConfig extends WebSecurityConfigurerAdapter {
                     .antMatchers("/login").permitAll()
                     .antMatchers(HttpMethod.GET, "/api/foods/**").hasAnyRole("EMPLOYEE","ADMIN")
                     .antMatchers(HttpMethod.GET, "/api/menus/**").hasAnyRole("EMPLOYEE","ADMIN")
+                    .antMatchers(HttpMethod.GET, "/api/non-menus/**").hasAnyRole("EMPLOYEE","ADMIN")
                     .antMatchers("/api/foods/**").hasRole("ADMIN")
                     .antMatchers("/api/menus/**").hasRole("ADMIN")
                     .antMatchers("/api/orders/**", "/api/requests/**").hasRole("ADMIN")

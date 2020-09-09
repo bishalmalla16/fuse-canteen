@@ -8,18 +8,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
-import java.util.Set;
 
 @Service
 public class MenuService {
 
     @Autowired
     private MenuRepository menuRepo;
-
-    public Set<Food> findFoodsById(int id){
-        Menu menu = findById(id);
-        return menu.getFoods();
-    }
 
     public Menu findById(int id){
         return menuRepo.findById(id).orElse(null);

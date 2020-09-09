@@ -99,7 +99,7 @@ public class MenuController {
         if(menu == null){
             throw new ResourcesNotFoundException("Today's Menu not found.");
         }
-        return menuService.findFoodsById(menu.getId());
+        return menu.getFoods();
     }
 
     @PostMapping("/foods")
