@@ -54,7 +54,6 @@ public class MenuController {
 
     @GetMapping
     public Menu findByDate(@RequestParam(required = false, defaultValue = "today") Date date){
-        logger.info("Menu date: " + date);
         Menu menu = menuService.findByDate(date);
         if(menu == null){
             throw new ResourcesNotFoundException("Menu not found for date : " + formatter.format(date));
